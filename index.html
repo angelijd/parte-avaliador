@@ -463,19 +463,13 @@ async function avaliar() {
   document.getElementById('resultado').innerHTML = '';
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/avaliar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 600,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: `Avalie: "${prompt}"` }]
-      })
+      body: JSON.stringify({ prompt })
     });
-    const data = await res.json();
-    const text = data.content?.find(b => b.type === 'text')?.text || '';
-    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    if (!res.ok) throw new Error('Erro na avaliação');
+    const parsed = await res.json();
     renderResultado(parsed, prompt);
   } catch(err) {
     document.getElementById('resultado').innerHTML = `<p style="color:#A32D2D;font-size:14px">Algo deu errado. Tenta de novo.</p>`;
