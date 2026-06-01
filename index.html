@@ -1,19 +1,586 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Avaliador de Prompts</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet" />
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { background: #FAFAF8; }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Método PARTE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  :root {
+    --green-dark:  #04342C;
+    --green-mid:   #0F6E56;
+    --green-light: #5DCAA5;
+    --green-pale:  #E1F5EE;
+    --amber-dark:  #BA7517;
+    --amber-pale:  #FAEEDA;
+    --gray-border: #D3D1C7;
+    --text-dark:   #2C2C2A;
+    --text-mid:    #444441;
+    --text-muted:  #888780;
+    --bg:          #FAFAF8;
+    --white:       #ffffff;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-dark); line-height: 1.6; }
+
+  /* HEADER */
+  header { background: var(--green-dark); padding: 52px 40px 44px; position: relative; overflow: hidden; }
+  header::before {
+    content: 'PARTE'; position: absolute; right: -24px; top: -24px;
+    font-family: 'Lora', serif; font-size: 160px; font-weight: 700;
+    color: rgba(255,255,255,0.03); letter-spacing: -6px; pointer-events: none; user-select: none; line-height: 1;
+  }
+  .header-inner { max-width: 760px; margin: 0 auto; position: relative; }
+  .header-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(93,202,165,0.15); border: 1px solid rgba(93,202,165,0.3);
+    border-radius: 20px; padding: 5px 14px; font-size: 12px; color: var(--green-light);
+    letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin-bottom: 20px;
+  }
+  header h1 {
+    font-family: 'Lora', serif; font-size: clamp(52px, 9vw, 88px); font-weight: 700;
+    color: var(--green-pale); letter-spacing: -3px; line-height: 1; margin-bottom: 16px;
+  }
+  header h1 span { color: var(--green-light); }
+  .header-sub { font-size: 15px; color: #9FE1CB; font-weight: 300; max-width: 500px; line-height: 1.7; margin-bottom: 28px; }
+  .header-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .header-pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; border: 1px solid; }
+
+  /* MAIN */
+  main { max-width: 760px; margin: 0 auto; padding: 52px 40px 80px; }
+  .section-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--gray-border); }
+
+  /* PILARES */
+  .pilares { display: flex; flex-direction: column; gap: 2px; margin-bottom: 40px; }
+  .pilar {
+    background: var(--white); border: 1px solid var(--gray-border); overflow: hidden;
+  }
+  .pilar:first-child { border-radius: 12px 12px 0 0; }
+  .pilar:last-child  { border-radius: 0 0 12px 12px; }
+
+  .pilar-inner { display: grid; grid-template-columns: 56px 1fr; }
+
+  .pilar-letra {
+    display: flex; align-items: flex-start; justify-content: center; padding-top: 22px;
+    font-family: 'Lora', serif; font-size: 26px; font-weight: 700;
+    background: var(--accent-pale, #E1F5EE); color: var(--accent-color, #0F6E56);
+    border-right: 1px solid var(--gray-border);
+  }
+
+  .pilar-content { padding: 18px 20px 22px; }
+
+  .pilar-nome {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent-color, #0F6E56); margin-bottom: 3px;
+  }
+  .pilar-pergunta { font-size: 15px; font-weight: 500; color: var(--text-dark); line-height: 1.35; margin-bottom: 12px; }
+
+  .pilar-exemplo {
+    font-size: 13px; color: var(--text-mid); font-style: italic; line-height: 1.6;
+    background: var(--accent-pale, #E1F5EE); padding: 8px 12px; border-radius: 6px;
+    margin-bottom: 14px; border-left: 2px solid var(--accent-color, #0F6E56);
+  }
+  .pilar-exemplo-label {
+    font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em;
+    text-transform: uppercase; font-weight: 500; margin-bottom: 5px;
+  }
+
+  .campo-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent-color, #0F6E56); margin-bottom: 6px;
+  }
+
+  .pilar-content textarea {
+    width: 100%; border: 1px solid var(--gray-border); border-radius: 8px;
+    padding: 10px 14px; font-size: 14px; font-family: 'DM Sans', sans-serif;
+    color: var(--text-dark); background: var(--bg); resize: vertical;
+    min-height: 68px; line-height: 1.6; transition: border-color 0.15s, background 0.15s;
+  }
+  .pilar-content textarea:focus { outline: none; border-color: var(--accent-color, #0F6E56); background: var(--white); }
+  .pilar-content textarea::placeholder { color: #B4B2A9; font-style: italic; }
+
+  /* FRASE BASE DINÂMICA */
+  .frase-base {
+    background: var(--green-dark); border-radius: 12px; padding: 28px 32px;
+    margin-bottom: 32px; position: relative; overflow: hidden;
+  }
+  .frase-base::before {
+    content: '"'; position: absolute; top: -28px; left: 16px;
+    font-family: 'Lora', serif; font-size: 140px; color: rgba(93,202,165,0.07);
+    line-height: 1; pointer-events: none;
+  }
+  .frase-base-label { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-light); margin-bottom: 14px; }
+  #frase-dinamica {
+    font-family: 'Lora', serif; font-size: clamp(14px, 2.2vw, 16px);
+    line-height: 2; position: relative; min-height: 2em;
+  }
+  .ft-p { color: #5DCAA5; font-weight: 600; }
+  .ft-a { color: #FAC775; font-weight: 600; }
+  .ft-r { color: #85B7EB; font-weight: 600; }
+  .ft-t { color: #ED93B1; font-weight: 600; }
+  .ft-e { color: #B4B2A9; font-weight: 600; }
+  .ft-vazio { color: rgba(255,255,255,0.2); font-style: italic; }
+
+  /* BOTÃO */
+  .btn-avaliar {
+    width: 100%; background: #EF9F27; color: #04342C;
+    border: none; border-radius: 10px; padding: 18px; font-size: 16px;
+    font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer;
+    transition: background 0.15s, transform 0.1s; letter-spacing: 0.01em; margin-bottom: 40px;
+  }
+  .btn-avaliar:hover    { background: #BA7517; color: #fff; }
+  .btn-avaliar:active   { transform: scale(0.99); }
+  .btn-avaliar:disabled { background: #B4B2A9; color: #fff; cursor: not-allowed; }
+
+  /* LOADING */
+  #loading { display: none; text-align: center; padding: 40px 0; margin-bottom: 20px; }
+  .loading-letras { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; }
+  .loading-letra {
+    width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; font-weight: 600; font-size: 14px;
+    animation: pulse 1.4s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* RESULTADO */
+  #resultado { display: none; }
+  .nota-box {
+    border-radius: 12px; padding: 20px 24px; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nota-label { font-size: 12px; font-weight: 500; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .nota-valor { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; }
+
+  .btn-novo {
+    background: transparent; border: 1px solid var(--gray-border); color: var(--text-muted);
+    border-radius: 8px; padding: 10px 20px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn-novo:hover { background: #F1EFE8; color: var(--text-dark); }
+
+  .diagnostico { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .diag-item {
+    background: var(--white); border: 1px solid var(--gray-border); border-radius: 10px;
+    padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px;
+  }
+  .diag-badge {
+    width: 32px; height: 32px; min-width: 32px; border-radius: 8px; display: flex;
+    align-items: center; justify-content: center; font-weight: 600; font-size: 14px; margin-top: 1px;
+  }
+  .diag-info { flex: 1; }
+  .diag-topo { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .diag-nome { font-size: 14px; font-weight: 500; color: var(--text-dark); }
+  .status-tag { display: inline-flex; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .diag-trecho { font-size: 13px; color: #5F5E5A; font-style: italic; line-height: 1.5; }
+  .diag-vazio  { font-size: 13px; color: #B4B2A9; line-height: 1.5; }
+
+  .melhorias { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .melhoria-item {
+    border-radius: 10px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start;
+    border: 1px solid;
+  }
+  .melhoria-badge {
+    width: 28px; height: 28px; min-width: 28px; border-radius: 6px; display: flex;
+    align-items: center; justify-content: center; font-weight: 600; font-size: 13px;
+    color: #fff; margin-top: 1px;
+  }
+  .melhoria-nome { font-size: 12px; font-weight: 500; margin-bottom: 3px; }
+  .melhoria-texto { font-size: 14px; color: var(--text-dark); line-height: 1.6; }
+
+  .prompt-melhorado {
+    background: var(--white); border: 1px solid var(--green-light);
+    border-radius: 12px; overflow: hidden; margin-bottom: 24px;
+  }
+  .prompt-melhorado-header {
+    background: var(--green-pale); padding: 10px 16px; border-bottom: 1px solid var(--green-light);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .prompt-melhorado-header span { font-size: 11px; font-weight: 500; color: var(--green-mid); text-transform: uppercase; letter-spacing: 0.08em; }
+  .btn-copiar {
+    background: rgba(15,110,86,0.1); border: 1px solid rgba(15,110,86,0.3);
+    color: var(--green-mid); border-radius: 6px; padding: 5px 12px;
+    font-size: 12px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-copiar:hover { background: rgba(15,110,86,0.2); }
+  .btn-copiar.copiado { background: var(--green-mid); color: #fff; border-color: var(--green-mid); }
+  .prompt-melhorado-texto { padding: 20px 24px; font-size: 14px; color: var(--text-dark); line-height: 1.9; white-space: pre-wrap; }
+
+  /* ANIMAÇÕES */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .pilar { animation: fadeUp 0.35s ease both; }
+  .pilar:nth-child(1){animation-delay:0.05s}
+  .pilar:nth-child(2){animation-delay:0.10s}
+  .pilar:nth-child(3){animation-delay:0.15s}
+  .pilar:nth-child(4){animation-delay:0.20s}
+  .pilar:nth-child(5){animation-delay:0.25s}
+
+  /* FOOTER */
+  footer { background: var(--green-dark); padding: 28px 40px; text-align: center; }
+  .footer-inner { max-width: 760px; margin: 0 auto; }
+  .footer-logo { font-family: 'Lora', serif; font-size: 14px; font-weight: 700; color: var(--green-pale); letter-spacing: 2px; margin-bottom: 4px; text-transform: uppercase; }
+  .footer-by { font-size: 12px; color: var(--green-light); font-weight: 300; }
+
+  @media(max-width:600px){
+    header{padding:40px 24px 36px} main{padding:40px 24px 60px} footer{padding:24px}
+    .pilar-inner{grid-template-columns:44px 1fr} .pilar-letra{font-size:20px;padding-top:18px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-tag">Método de Prompts</div>
+    <h1>Método P<span>A</span>RTE</h1>
+    <p class="header-sub">Preencha os cinco campos. Seu prompt aparece em tempo real na frase-base — e você ainda recebe uma avaliação com sugestões de melhoria.</p>
+    <div class="header-pills">
+      <span class="header-pill" style="color:#5DCAA5;border-color:rgba(93,202,165,0.3);background:rgba(93,202,165,0.08)">P · Papel</span>
+      <span class="header-pill" style="color:#FAC775;border-color:rgba(250,199,117,0.3);background:rgba(250,199,117,0.08)">A · Ação</span>
+      <span class="header-pill" style="color:#85B7EB;border-color:rgba(133,183,235,0.3);background:rgba(133,183,235,0.08)">R · Resultado</span>
+      <span class="header-pill" style="color:#ED93B1;border-color:rgba(237,147,177,0.3);background:rgba(237,147,177,0.08)">T · Tom</span>
+      <span class="header-pill" style="color:#B4B2A9;border-color:rgba(180,178,169,0.3);background:rgba(180,178,169,0.08)">E · Exclusões</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <p class="section-label">Preencha os cinco elementos</p>
+
+  <div class="pilares">
+
+    <div class="pilar" style="--accent-color:#0F6E56;--accent-pale:#E1F5EE">
+      <div class="pilar-inner">
+        <div class="pilar-letra">P</div>
+        <div class="pilar-content">
+          <p class="pilar-nome">Papel</p>
+          <p class="pilar-pergunta">Quem você quer que a IA seja?</p>
+          <p class="pilar-exemplo-label">Exemplo</p>
+          <p class="pilar-exemplo">"Você é um redator especialista em comunicação jurídica"</p>
+          <p class="campo-label">O seu papel</p>
+          <textarea id="campo-p" rows="2" oninput="atualizarFrase()" placeholder="Ex: assistente especialista em comunicação para pequenas empresas"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="pilar" style="--accent-color:#BA7517;--accent-pale:#FAEEDA">
+      <div class="pilar-inner">
+        <div class="pilar-letra">A</div>
+        <div class="pilar-content">
+          <p class="pilar-nome">Ação</p>
+          <p class="pilar-pergunta">O que exatamente você quer que ela faça?</p>
+          <p class="pilar-exemplo-label">Exemplo</p>
+          <p class="pilar-exemplo">"Escreve um e-mail de cobrança para um cliente"</p>
+          <p class="campo-label">A sua ação</p>
+          <textarea id="campo-a" rows="2" oninput="atualizarFrase()" placeholder="Ex: escreve, resume, cria, sugere, adapta, revisa..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="pilar" style="--accent-color:#185FA5;--accent-pale:#E6F1FB">
+      <div class="pilar-inner">
+        <div class="pilar-letra">R</div>
+        <div class="pilar-content">
+          <p class="pilar-nome">Resultado</p>
+          <p class="pilar-pergunta">Qual o contexto e o que você espera obter?</p>
+          <p class="pilar-exemplo-label">Exemplo</p>
+          <p class="pilar-exemplo">"Fatura de R$4.200 em atraso há 15 dias, cliente de 2 anos, quero manter o relacionamento"</p>
+          <p class="campo-label">O seu resultado</p>
+          <textarea id="campo-r" rows="3" oninput="atualizarFrase()" placeholder="Ex: contexto da situação, quem é o público, o que você quer que aconteça depois..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="pilar" style="--accent-color:#993556;--accent-pale:#FBEAF0">
+      <div class="pilar-inner">
+        <div class="pilar-letra">T</div>
+        <div class="pilar-content">
+          <p class="pilar-nome">Tom</p>
+          <p class="pilar-pergunta">Como você quer soar?</p>
+          <p class="pilar-exemplo-label">Exemplo</p>
+          <p class="pilar-exemplo">"Cordial e profissional — firme, mas sem agressividade"</p>
+          <p class="campo-label">O seu tom</p>
+          <textarea id="campo-t" rows="2" oninput="atualizarFrase()" placeholder="Ex: direto, acolhedor, técnico, informal, institucional..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="pilar" style="--accent-color:#5F5E5A;--accent-pale:#F1EFE8">
+      <div class="pilar-inner">
+        <div class="pilar-letra">E</div>
+        <div class="pilar-content">
+          <p class="pilar-nome">Exclusões</p>
+          <p class="pilar-pergunta">O que você não quer que apareça?</p>
+          <p class="pilar-exemplo-label">Exemplo</p>
+          <p class="pilar-exemplo">"Sem ameaças, sem linguagem agressiva, sem mencionar protesto ou negativação"</p>
+          <p class="campo-label">As suas exclusões</p>
+          <textarea id="campo-e" rows="2" oninput="atualizarFrase()" placeholder="Ex: sem jargão técnico, sem bullet points, sem linguagem corporativa..."></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FRASE BASE DINÂMICA -->
+  <div class="frase-base">
+    <p class="frase-base-label">Seu prompt</p>
+    <p id="frase-dinamica"></p>
+  </div>
+
+  <button class="btn-avaliar" id="btn-avaliar" onclick="avaliar()">Avaliar meu prompt →</button>
+
+  <!-- LOADING -->
+  <div id="loading">
+    <div class="loading-letras">
+      <div class="loading-letra" style="background:#E1F5EE;color:#0F6E56;animation-delay:0s">P</div>
+      <div class="loading-letra" style="background:#FAEEDA;color:#BA7517;animation-delay:0.15s">A</div>
+      <div class="loading-letra" style="background:#E6F1FB;color:#185FA5;animation-delay:0.30s">R</div>
+      <div class="loading-letra" style="background:#FBEAF0;color:#993556;animation-delay:0.45s">T</div>
+      <div class="loading-letra" style="background:#F1EFE8;color:#5F5E5A;animation-delay:0.60s">E</div>
+    </div>
+    <p style="font-size:14px;color:#888780">Analisando seu prompt...</p>
+  </div>
+
+  <!-- RESULTADO -->
+  <div id="resultado"></div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p class="footer-logo">IA para negócios — Método PARTE</p>
+    <p class="footer-by">por Cristiane Miura &amp; Jéssica Angeli</p>
+  </div>
+</footer>
+
+<script>
+const CORES = {
+  P:{ main:'#0F6E56', light:'#E1F5EE', label:'Papel' },
+  A:{ main:'#BA7517', light:'#FAEEDA', label:'Ação' },
+  R:{ main:'#185FA5', light:'#E6F1FB', label:'Resultado' },
+  T:{ main:'#993556', light:'#FBEAF0', label:'Tom' },
+  E:{ main:'#5F5E5A', light:'#F1EFE8', label:'Exclusões' }
+};
+const NOTA_CFG = {
+  bom:      { label:'Bom',             emoji:'✦', bg:'#E1F5EE', color:'#0F6E56', border:'#5DCAA5' },
+  mediano:  { label:'Mediano',         emoji:'◈', bg:'#FAEEDA', color:'#BA7517', border:'#EF9F27' },
+  melhorar: { label:'Precisa melhorar',emoji:'◇', bg:'#FCEBEB', color:'#A32D2D', border:'#F09595' }
+};
+const STATUS_CFG = {
+  presente:{ label:'Presente', color:'#0F6E56', bg:'#E1F5EE' },
+  parcial: { label:'Parcial',  color:'#BA7517', bg:'#FAEEDA' },
+  ausente: { label:'Ausente',  color:'#A32D2D', bg:'#FCEBEB' }
+};
+
+function montarPrompt() {
+  const p = (document.getElementById('campo-p').value||'').trim();
+  const a = (document.getElementById('campo-a').value||'').trim();
+  const r = (document.getElementById('campo-r').value||'').trim();
+  const t = (document.getElementById('campo-t').value||'').trim();
+  const e = (document.getElementById('campo-e').value||'').trim();
+  const partes = [];
+  if (p) partes.push(`Você é ${p}.`);
+  if (a) partes.push(a.charAt(0).toUpperCase()+a.slice(1)+(a.endsWith('.')?'':'.'));
+  if (r) partes.push(r.charAt(0).toUpperCase()+r.slice(1)+(r.endsWith('.')?'':'.'));
+  if (t) partes.push(`Tom: ${t}.`);
+  if (e) partes.push(`Sem ${e.replace(/^sem\s+/i,'')}.`);
+  return partes.join(' ');
+}
+
+function atualizarFrase() {
+  const p = (document.getElementById('campo-p').value||'').trim();
+  const a = (document.getElementById('campo-a').value||'').trim();
+  const r = (document.getElementById('campo-r').value||'').trim();
+  const t = (document.getElementById('campo-t').value||'').trim();
+  const e = (document.getElementById('campo-e').value||'').trim();
+
+  const vazio = cls => `<span class="ft-vazio">${cls}</span>`;
+
+  let html = '';
+  html += p ? `<span class="ft-p">Você é ${p}.</span> ` : vazio('[papel] ');
+  html += a ? `<span class="ft-a">${a.charAt(0).toUpperCase()+a.slice(1)}${a.endsWith('.')?'':'.'}</span> ` : vazio('[ação] ');
+  html += r ? `<span class="ft-r">${r.charAt(0).toUpperCase()+r.slice(1)}${r.endsWith('.')?'':'.'}</span> ` : vazio('[resultado] ');
+  html += t ? `<span class="ft-t">Tom: ${t}.</span> ` : vazio('[tom] ');
+  html += e ? `<span class="ft-e">Sem ${e.replace(/^sem\s+/i,'')}.</span>` : vazio('[exclusões]');
+
+  document.getElementById('frase-dinamica').innerHTML = html;
+}
+
+// Inicializa frase vazia
+atualizarFrase();
+
+const SYSTEM_PROMPT = `Você é um avaliador do framework PARTE para prompts de IA.
+
+PARTE:
+- P (Papel): quem a IA deve ser
+- A (Ação): verbo claro do que fazer
+- R (Resultado): contexto e o que o usuário espera
+- T (Tom): como quer soar
+- E (Exclusões): o que NÃO deve aparecer
+
+Retorne APENAS JSON válido, sem markdown.
+
+{
+  "nota": "bom" | "mediano" | "melhorar",
+  "partes": {
+    "P": { "status": "presente" | "parcial" | "ausente", "encontrado": "trecho ou vazio" },
+    "A": { "status": "presente" | "parcial" | "ausente", "encontrado": "trecho ou vazio" },
+    "R": { "status": "presente" | "parcial" | "ausente", "encontrado": "trecho ou vazio" },
+    "T": { "status": "presente" | "parcial" | "ausente", "encontrado": "trecho ou vazio" },
+    "E": { "status": "presente" | "parcial" | "ausente", "encontrado": "trecho ou vazio" }
+  },
+  "melhorias": [
+    { "parte": "P"|"A"|"R"|"T"|"E", "sugestao": "sugestão objetiva em 1-2 linhas" }
+  ],
+  "prompt_melhorado": "versão melhorada com as sugestões aplicadas"
+}
+
+Regras:
+- "bom": 4-5 partes presentes
+- "mediano": 2-3 partes (ou parciais)
+- "melhorar": 0-1 parte presente
+- Máximo 2 melhorias, priorizando ausentes mais impactantes
+- Público leigo — seja direto e prático`;
+
+async function avaliar() {
+  const prompt = montarPrompt();
+  if (!prompt || prompt.length < 10) {
+    alert('Preencha pelo menos Papel, Ação e Resultado antes de avaliar.');
+    return;
+  }
+
+  document.getElementById('btn-avaliar').disabled = true;
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('resultado').style.display = 'none';
+  document.getElementById('resultado').innerHTML = '';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: `Avalie: "${prompt}"` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
+    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    renderResultado(parsed, prompt);
+  } catch(err) {
+    document.getElementById('resultado').innerHTML = `<p style="color:#A32D2D;font-size:14px">Algo deu errado. Tenta de novo.</p>`;
+    document.getElementById('resultado').style.display = 'block';
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('btn-avaliar').disabled = false;
+  }
+}
+
+function renderResultado(d, promptOriginal) {
+  const nc = NOTA_CFG[d.nota] || NOTA_CFG.melhorar;
+  let html = '';
+
+  // Nota
+  html += `<div class="nota-box" style="background:${nc.bg};border:1px solid ${nc.border}">
+    <div>
+      <p class="nota-label" style="color:${nc.color}">Avaliação</p>
+      <p class="nota-valor" style="color:${nc.color}">${nc.emoji} ${nc.label}</p>
+    </div>
+    <button class="btn-novo" onclick="resetar()">Novo prompt</button>
+  </div>`;
+
+  // Prompt avaliado
+  html += `<div style="background:#fff;border:1px solid #D3D1C7;border-radius:12px;padding:16px 20px;margin-bottom:20px">
+    <p style="font-size:11px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Prompt avaliado</p>
+    <p style="font-size:14px;color:#444441;line-height:1.7;font-style:italic">${promptOriginal}</p>
+  </div>`;
+
+  // Diagnóstico
+  html += `<p style="font-size:12px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Diagnóstico por parte</p>`;
+  html += `<div class="diagnostico">`;
+  for (const [letra, dado] of Object.entries(d.partes)) {
+    const c = CORES[letra];
+    const st = STATUS_CFG[dado.status] || STATUS_CFG.ausente;
+    html += `<div class="diag-item">
+      <div class="diag-badge" style="background:${c.light};color:${c.main}">${letra}</div>
+      <div class="diag-info">
+        <div class="diag-topo">
+          <span class="diag-nome">${c.label}</span>
+          <span class="status-tag" style="background:${st.bg};color:${st.color}">${st.label}</span>
+        </div>
+        ${dado.encontrado
+          ? `<p class="diag-trecho">"${dado.encontrado}"</p>`
+          : `<p class="diag-vazio">Não identificado no prompt</p>`}
+      </div>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // Melhorias
+  if (d.melhorias?.length > 0) {
+    html += `<p style="font-size:12px;font-weight:500;color:#888780;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">${d.melhorias.length === 1 ? '1 sugestão de melhoria' : d.melhorias.length+' sugestões de melhoria'}</p>`;
+    html += `<div class="melhorias">`;
+    for (const m of d.melhorias) {
+      const c = CORES[m.parte];
+      html += `<div class="melhoria-item" style="background:${c.light};border-color:${c.main}33">
+        <div class="melhoria-badge" style="background:${c.main}">${m.parte}</div>
+        <div>
+          <p class="melhoria-nome" style="color:${c.main}">${c.label}</p>
+          <p class="melhoria-texto">${m.sugestao}</p>
+        </div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Prompt melhorado
+  if (d.prompt_melhorado) {
+    html += `<div class="prompt-melhorado">
+      <div class="prompt-melhorado-header">
+        <span>Prompt melhorado</span>
+        <button class="btn-copiar" id="btn-copiar" onclick="copiar(this, '${escapar(d.prompt_melhorado)}')">Copiar</button>
+      </div>
+      <div class="prompt-melhorado-texto">${d.prompt_melhorado}</div>
+    </div>`;
+  }
+
+  html += `<div style="text-align:center"><button class="btn-novo" onclick="resetar()">← Avaliar outro prompt</button></div>`;
+
+  const el = document.getElementById('resultado');
+  el.innerHTML = html;
+  el.style.display = 'block';
+  setTimeout(() => el.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+}
+
+function escapar(str) {
+  return str.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n');
+}
+
+function copiar(btn, texto) {
+  navigator.clipboard.writeText(texto.replace(/\\n/g,'\n')).then(() => {
+    btn.textContent = 'Copiado ✓';
+    btn.classList.add('copiado');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copiado'); }, 2000);
+  });
+}
+
+function resetar() {
+  ['p','a','r','t','e'].forEach(id => document.getElementById('campo-'+id).value = '');
+  atualizarFrase();
+  document.getElementById('resultado').style.display = 'none';
+  document.getElementById('resultado').innerHTML = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
 </html>
